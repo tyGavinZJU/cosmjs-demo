@@ -1,5 +1,12 @@
-import type { ChainInfo } from "@keplr-wallet/types";
+import type { ChainInfo, Window as KeplrWindow  } from "@keplr-wallet/types";
 import React, { useEffect, useState } from "react";
+import {
+	Account,
+	Block,
+	Coin,
+	SequenceResponse,
+	StargateClient,
+} from "@cosmjs/stargate";
 import osmo from "../config/osmosis";
 
 function Keplr() {
@@ -28,7 +35,12 @@ function Keplr() {
 	}, [address, client, sendHash]);
 
 	// 连接keplr钱包  Todo
-	const connectWallet = async () => {};
+	const connectWallet = async () => {
+		let r = await StargateClient.connect(chain.rpc)
+		let rChainId = await r.getChainId()
+		console.log(rChainId)
+		await window.keplr.enable(rChainId);
+	};
 
 	// 余额查询  Todo
 	const getBalances = async () => {};

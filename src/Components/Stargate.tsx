@@ -27,7 +27,9 @@ function Stargate() {
 
 	// 连接
 	useEffect(() => {
+
 		if (!chain) return;
+		setMnemonic("economy bargain pond assist ring palace jeans hurry enter luggage segment pyramid")
 		connect();
 	}, [chain]);
 
@@ -49,22 +51,88 @@ function Stargate() {
 	}, [address, client]);
 
 	// 创建账户 Todo
-	const createAccount = async () => {};
+	const createAccount = async () => {
+		let account
+		if (mnemonic != undefined) {
+			
+			let r = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {prefix : chain.bech32Config.bech32PrefixAccAddr})
+			account = await r.getAccounts()
+			console.log(account)
+			console.log(String(account[0].address))
+			setAddress(String(account[0].address))
+			await getAddressByMnemonic()
+		}
+
+	};
 
 	// 通过助记词钱包获得地址 Todo
-	const getAddressByMnemonic = async () => {}
+	const getAddressByMnemonic = async () => {
+		let r = await DirectSecp256k1HdWallet.fromMnemonic(mnemonic, {prefix : chain.bech32Config.bech32PrefixAccAddr})
+		//console.log("in")
+		let account = await r.getAccounts()
+		//console.log(account)
+		//console.log(String(account[0].address))
+		setAddress(String(account[0].address))
+		if (client) {
+			console.log(client.getAccount, "in2", String(account[0].address))
+			let rA = await client.getAccount(String(account[0].address))
+			console.log(rA)
+			setAccount(rA)
+		}
+	}
 
 	// 余额查询 Todo
-	const getBalance = async () => {};
+	const getBalance = async () => {
+		if (client) {
+			if (address) {
+				let b = await client.getAllBalances(address)
+				//console.log("balances:", b)
+				setAllBalances(b)
+			}
+		}
+
+		
+	};
 
 	// strageClient 基础 api 使用 Todo
-	const getOthers = async () => {};
+	const getOthers = async () => {
+		if (client) {
+			let r = await StargateClient.connect(chain.rpc)
+			//console.log(r)
+			setClient(r)
+
+			if (chainId == undefined) {
+				let rChainId = await client.getChainId()
+				setChainId(rChainId)
+			}
+
+			if (block == undefined && height != undefined) {
+				let rBlockOne = await client.getBlock(height)
+				setBlock(rBlockOne)
+			}
+
+			if (height == undefined) {
+				let rHeight = await client.getHeight()
+
+				
+				//console.log(rHeight)
+				setHeight(rHeight)
+			}
+			
+		}
+	};
 
 	// connect client Todo
-	const connect = async () => {};
+	const connect = async () => {
+		let r = await StargateClient.connect(chain.rpc)
+		//console.log(r)
+		setClient(r)
+	};
 
 	// disconnect client Todo
-	const disConnect = async () => {};
+	const disConnect = async () => {
+		setClient(null)
+	};
 
 	return (
 		<div className="stargate">
@@ -81,7 +149,7 @@ function Stargate() {
 					<input
 						type="text"
 						value={mnemonic}
-						placeholder="mnemonic"
+						placeholder="economy bargain pond assist ring palace jeans hurry enter luggage segment pyramid"
 						style={{ width: "400px" }}
 						onChange={(e) => setMnemonic(e.target.value.trim())}
 					/>
